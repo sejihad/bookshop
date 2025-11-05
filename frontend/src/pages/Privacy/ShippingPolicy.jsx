@@ -1,4 +1,4 @@
-import { Globe, Lock, Mail, MapPin, Shield } from "lucide-react";
+import { Globe, Lock, Shield } from "lucide-react";
 
 const ShippingPolicy = () => {
   return (
@@ -11,7 +11,7 @@ const ShippingPolicy = () => {
             Privacy Policy
           </h1>
           <p className="text-xl text-blue-300 max-w-3xl mx-auto">
-            Last Updated: August 15, 2025 | Effective Date: August 15, 2025
+            Last Updated: November 5, 2025 | Effective Date: Novermber 5, 2025
           </p>
         </div>
       </div>
@@ -24,7 +24,7 @@ const ShippingPolicy = () => {
             <p className="text-lg">
               At{" "}
               <span className="font-bold text-indigo-400">
-                MindStormBook {""}
+                Jennifer Shops {""}
               </span>
               your privacy isn't just a legal obligation—it's a commitment. We
               value the trust you place in us and are dedicated to safeguarding
@@ -268,10 +268,10 @@ const ShippingPolicy = () => {
                     inaccuracies, request deletion of your personal data, and
                     withdraw consent for certain processing activities.
                   </p>
-                  <p className="text-indigo-400 font-medium">
+                  {/* <p className="text-indigo-400 font-medium">
                     To exercise these rights, please email:
                     privacy@MindStormBook.com
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </div>
@@ -301,7 +301,7 @@ const ShippingPolicy = () => {
             </div>
 
             {/* Section 12 */}
-            <div className="p-8">
+            {/* <div className="p-8">
               <h2 className="text-2xl font-bold text-white mb-4">
                 12. Contact Us
               </h2>
@@ -317,7 +317,7 @@ const ShippingPolicy = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

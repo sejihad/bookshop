@@ -49,9 +49,9 @@ const Hero = () => {
                   LEARN AND GROW
                 </span>
               </h1>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed bg-white/30 backdrop-blur-sm rounded-lg p-4">
-                Discover the power of books that grow your mind. Dive into
-                endless possibilities and fuel your imagination.
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed bg-white/30 backdrop-blur-sm rounded-lg ">
+                Feed your mind. Free your imagination. Books are where endless
+                possibilities begin.
               </p>
 
               <Link

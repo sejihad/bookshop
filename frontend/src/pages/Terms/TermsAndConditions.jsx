@@ -1,4 +1,4 @@
-import { FileText, Mail } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const TermsAndConditions = () => {
   return (
@@ -11,7 +11,7 @@ const TermsAndConditions = () => {
             Terms & Conditions
           </h1>
           <p className="text-xl text-blue-300 max-w-3xl mx-auto">
-            Effective Date: August 15, 2025
+            Effective Date: Novermber 5, 2025
           </p>
         </div>
       </div>
@@ -23,7 +23,7 @@ const TermsAndConditions = () => {
           <div className="p-8">
             <p className="text-lg">
               Welcome to the{" "}
-              <span className="font-bold text-indigo-400">MindStormBook</span>{" "}
+              <span className="font-bold text-indigo-400">Jennifer Shops</span>{" "}
               mobile application ("App"), ("we," "our," or "us"). These Terms &
               Conditions ("Terms") govern your use of our App, which is
               available via the Google Play Store and other platforms.
@@ -144,10 +144,10 @@ const TermsAndConditions = () => {
                   91303, USA.
                 </span> */}
               </div>
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <Mail className="text-indigo-400 mr-3" size={20} />
                 <span className="text-gray-400">privacy@MindStormBook.com</span>
-              </div>
+              </div> */}
               <div className="flex items-center">
                 {/*<Phone className="text-indigo-400 mr-3" size={20} />
                  <span className="text-gray-400">+1 (818) 334-7704</span> */}

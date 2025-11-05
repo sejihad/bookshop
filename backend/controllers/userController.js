@@ -120,7 +120,7 @@ const loginUser = catchAsyncErrors(async (req, res, next) => {
 
     await sendEmail({
       email: user.email,
-      subject: "Mind Storm Book Login OTP Code",
+      subject: "Jennifer Shops Login OTP Code",
       message,
     });
 
@@ -267,7 +267,7 @@ const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: `Mind Storm Book Password Recovery`,
+      subject: `Jennifer Shops Password Recovery`,
       message,
     });
 

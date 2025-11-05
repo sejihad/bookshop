@@ -113,17 +113,17 @@ const Header = () => {
             {/* Logo */}
             <img
               src={logo}
-              alt="Copy Book Shop Logo"
+              alt="Jennifer shops Logo"
               className="h-6 sm:h-8 md:h-10 w-auto object-contain"
             />
 
             {/* Brand Name */}
             <div className="flex flex-col sm:flex-row sm:items-center leading-tight">
               <p className="font-bold text-sm sm:text-lg md:text-xl text-purple-600">
-                Copy Books
+                Jennifer
               </p>
               <span className="font-bold text-sm sm:text-lg md:text-xl text-gray-700 sm:ml-1">
-                Shop
+                Shops
               </span>
             </div>
           </Link>

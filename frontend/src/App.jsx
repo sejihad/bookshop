@@ -9,7 +9,6 @@ import Footer from "./component/layout/Footer";
 import Header from "./component/layout/Header";
 import ScrollToTop from "./component/layout/ScrollToTop";
 import ProtectedRoute from "./component/Route/ProtectedRoute";
-import AboutUs from "./pages/About/AboutUs";
 import AdminOrderDetails from "./pages/Admin/AdminOrderDetails";
 import AllBlogs from "./pages/Admin/AllBlogs";
 import AllBooks from "./pages/Admin/AllBooks";
@@ -35,7 +34,6 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import GoogleSuccess from "./pages/Auth/GoogleSuccess";
 import Login from "./pages/Auth/Login";
 import ResetPassword from "./pages/Auth/ResetPassword";
-import AuthorPage from "./pages/Author/Author";
 import BlogDetails from "./pages/Blogs/BlogDetails";
 import Blogs from "./pages/Blogs/Blogs";
 import BookPage from "./pages/Book/BookPage";
@@ -107,8 +105,8 @@ const App = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/shipping" element={<ShippingPolicy />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/author" element={<AuthorPage />} />
+        {/* <Route path="/about" element={<AboutUs />} /> */}
+        {/* <Route path="/author" element={<AuthorPage />} /> */}
         <Route path="/terms" element={<TermsConditions />} />
         <Route path="/packages" element={<PackageSection />} />
         <Route path="/package/:slug" element={<PackageDetails />} />

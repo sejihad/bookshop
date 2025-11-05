@@ -39,11 +39,7 @@ app.use(fileUpload());
 // ✅ CORS Middleware Fix
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL,
-      "https://mindstormbook.com",
-      "https://www.mindstormbook.com",
-    ],
+    origin: [process.env.FRONTEND_URL],
     credentials: true,
   })
 );
