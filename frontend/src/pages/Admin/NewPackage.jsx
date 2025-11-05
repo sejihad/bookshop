@@ -22,9 +22,8 @@ const NewPackage = () => {
     description: "",
     oldPrice: "",
     discountPrice: "",
-    deliveryTime: "7–10 days",
-    deliverToCountries:
-      "United States, Canada,Mexico, Spain, Central & South America",
+    deliveryTime: "",
+    deliverToCountries: "",
     videoLink: "",
     books: [], // Array of selected book IDs only
   });

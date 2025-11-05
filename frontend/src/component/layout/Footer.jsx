@@ -182,7 +182,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-purple-600 hover:underline"
             >
-              Digital Nexgen
+              Digital NexGen
             </a>
           </p>
         </div>
