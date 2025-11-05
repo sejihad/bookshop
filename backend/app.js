@@ -39,7 +39,11 @@ app.use(fileUpload());
 // ✅ CORS Middleware Fix
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: [
+      process.env.FRONTEND_URL,
+      "http://jennifershops.com",
+      "https://jennifershops.com",
+    ],
     credentials: true,
   })
 );
