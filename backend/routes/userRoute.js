@@ -45,22 +45,6 @@ router.get(
   googleLoginCallback
 );
 
-// Facebook Login Start
-router.get(
-  "/facebook",
-  passport.authenticate("facebook", { scope: ["email"] })
-);
-
-// ➤ Facebook Auth Callback
-router.get(
-  "/facebook/callback",
-  passport.authenticate("facebook", {
-    failureRedirect: `${process.env.FRONTEND_URL}/login`,
-    session: false,
-  }),
-  facebookLoginCallback
-);
-
 router.post("/logout", logoutUser);
 router.put("/twofactor/toggle", isAuthenticator, enableTwoFactor);
 

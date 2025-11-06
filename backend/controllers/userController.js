@@ -211,31 +211,6 @@ const googleLoginCallback = catchAsyncErrors(async (req, res, next) => {
   res.redirect(`${process.env.FRONTEND_URL}/google-success?token=${token}`);
 });
 
-const facebookLoginCallback = catchAsyncErrors(async (req, res, next) => {
-  const user = req.user;
-
-  if (!user) {
-    return next(
-      new ErrorHandler("Facebook authentication failed. Please try again.", 401)
-    );
-  }
-
-  const token = user.getJWTToken();
-
-  // Cookie set করা
-  res.cookie("token", token, {
-    expires: new Date(
-      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  });
-
-  // ফ্রন্টএন্ডে redirect, token URL param হিসেবে পাঠানো
-  res.redirect(`${process.env.FRONTEND_URL}/facebook-success?token=${token}`);
-});
-
 // ✅ Logout User
 const logoutUser = catchAsyncErrors(async (req, res, next) => {
   res.cookie("token", null, {
@@ -491,7 +466,7 @@ module.exports = {
   updatePassword,
   getAllUser,
   googleLoginCallback,
-  facebookLoginCallback,
+
   updateProfile,
   enableTwoFactor,
   verifyOtp,
