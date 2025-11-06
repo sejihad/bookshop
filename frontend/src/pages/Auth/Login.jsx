@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaFacebookF, FaGoogle } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -183,12 +183,12 @@ const Login = () => {
                 >
                   <FaGoogle className="icon" />
                 </a>
-                <a
+                {/* <a
                   href={`${import.meta.env.VITE_API_URL}/api/v1/facebook`}
                   aria-label="Facebook"
                 >
                   <FaFacebookF className="icon" />
-                </a>
+                </a> */}
               </div>
             </form>
           )}
@@ -292,12 +292,12 @@ const Login = () => {
               >
                 <FaGoogle className="icon" />
               </a>
-              <a
+              {/* <a
                 href={`${import.meta.env.VITE_API_URL}/api/v1/facebook`}
                 aria-label="Facebook"
               >
                 <FaFacebookF className="icon" />
-              </a>
+              </a> */}
             </div>
           </form>
         </div>
