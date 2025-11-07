@@ -23,7 +23,7 @@ const useQuery = () => {
 const Shop = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, books } = useSelector((state) => state.books);
+  const { loading, books, error } = useSelector((state) => state.books);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBooks, setFilteredBooks] = useState([]);
@@ -55,16 +55,23 @@ const Shop = () => {
   ];
   const uniqueTypes = [...new Set(books?.map((b) => b.type).filter(Boolean))];
 
-  // Calculate dynamic price range
+  // ✅ FIXED: Calculate dynamic price range with proper number parsing
   useEffect(() => {
     if (books && books.length > 0) {
       const prices = books
-        .map((b) => b.discountPrice || b.oldPrice || 0)
+        .map((b) => {
+          // Handle both string ($9.99) and number prices
+          const price = b.discountPrice || b.oldPrice || 0;
+          if (typeof price === "string") {
+            return parseFloat(price.replace(/[$,]/g, "")) || 0;
+          }
+          return price;
+        })
         .filter((price) => price > 0);
 
       if (prices.length > 0) {
-        const minPrice = Math.min(...prices);
-        const maxPrice = Math.max(...prices);
+        const minPrice = Math.floor(Math.min(...prices));
+        const maxPrice = Math.ceil(Math.max(...prices));
         setPriceRange({ min: minPrice, max: maxPrice });
         setFilters((prev) => ({
           ...prev,
@@ -84,7 +91,7 @@ const Shop = () => {
     setSearchTerm(querySearch);
   }, [location.search, query]);
 
-  // Filter books based on all criteria
+  // ✅ FIXED: Filter books based on all criteria with proper price parsing
   const applyFilters = useCallback(() => {
     if (!books || books.length === 0) {
       setFilteredBooks([]);
@@ -103,34 +110,41 @@ const Shop = () => {
       // Category filter
       const matchesCategory =
         filters.categories.length === 0 ||
-        filters.categories.includes(book.category);
+        (book.category && filters.categories.includes(book.category));
 
       // Type filter
       const matchesType =
         filters.types.length === 0 ||
         (book.type && filters.types.includes(book.type));
 
-      // Price filter
-      const bookPrice = book.discountPrice || book.oldPrice || 0;
-      const minPriceValue = parseInt(filters.minPrice) || priceRange.min;
-      const maxPriceValue = parseInt(filters.maxPrice) || priceRange.max;
+      // ✅ FIXED: Price filter with proper parsing
+      const bookPriceValue = book.discountPrice || book.oldPrice || 0;
+      const bookPrice =
+        typeof bookPriceValue === "string"
+          ? parseFloat(bookPriceValue.replace(/[$,]/g, "")) || 0
+          : bookPriceValue;
 
-      const matchesMinPrice = bookPrice >= minPriceValue;
-      const matchesMaxPrice = bookPrice <= maxPriceValue;
+      const minPriceValue = parseFloat(filters.minPrice) || priceRange.min;
+      const maxPriceValue = parseFloat(filters.maxPrice) || priceRange.max;
 
-      // Ratings filter
+      const matchesPrice =
+        bookPrice >= minPriceValue && bookPrice <= maxPriceValue;
+
+      // ✅ FIXED: Ratings filter - handle undefined ratings
+      const bookRating = book.ratings || 0;
       const matchesRating =
         filters.ratings.length === 0 ||
-        filters.ratings.some(
-          (rating) => book.ratings >= rating && book.ratings < rating + 1
-        );
+        filters.ratings.some((rating) => {
+          // Handle both integer and decimal ratings
+          const roundedRating = Math.floor(bookRating);
+          return roundedRating >= rating;
+        });
 
       return (
         matchesSearch &&
         matchesCategory &&
         matchesType &&
-        matchesMinPrice &&
-        matchesMaxPrice &&
+        matchesPrice &&
         matchesRating
       );
     });
@@ -162,7 +176,7 @@ const Shop = () => {
   };
 
   const handlePriceChange = (type, value) => {
-    const numValue = value === "" ? "" : parseInt(value) || 0;
+    const numValue = value === "" ? "" : Math.max(0, parseInt(value) || 0);
     setFilters((prev) => ({
       ...prev,
       [type]: numValue.toString(),
@@ -206,9 +220,10 @@ const Shop = () => {
 
   const showSearchInfo = searchTerm && filteredBooks.length > 0;
 
-  // Filter sidebar component
+  // ✅ FIXED: Filter sidebar component with better rating display
+  // ✅ FIXED: Filter sidebar component with proper scrolling
   const FilterSidebar = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-fit sticky top-4">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
@@ -220,7 +235,7 @@ const Shop = () => {
         </button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
         {/* Price Range */}
         <div className="border-b border-gray-200 pb-6">
           <button
@@ -239,7 +254,7 @@ const Shop = () => {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm text-gray-600 mb-1">
-                    Min Price
+                    Min Price ($)
                   </label>
                   <input
                     type="number"
@@ -247,14 +262,15 @@ const Shop = () => {
                     onChange={(e) =>
                       handlePriceChange("minPrice", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Min"
                     min="0"
+                    step="1"
                   />
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm text-gray-600 mb-1">
-                    Max Price
+                    Max Price ($)
                   </label>
                   <input
                     type="number"
@@ -262,13 +278,14 @@ const Shop = () => {
                     onChange={(e) =>
                       handlePriceChange("maxPrice", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Max"
                     min="0"
+                    step="1"
                   />
                 </div>
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 text-center">
                 Range: ${priceRange.min} - ${priceRange.max}
               </div>
             </div>
@@ -284,7 +301,7 @@ const Shop = () => {
             >
               <span className="flex items-center gap-2">
                 <FiBook className="w-4 h-4" />
-                Categories
+                Categories ({uniqueCategories.length})
               </span>
               {expandedSections.categories ? (
                 <FiChevronUp />
@@ -294,11 +311,11 @@ const Shop = () => {
             </button>
 
             {expandedSections.categories && (
-              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+              <div className="mt-4 space-y-2">
                 {uniqueCategories.map((category) => (
                   <label
                     key={category}
-                    className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded"
+                    className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -308,7 +325,7 @@ const Shop = () => {
                       }
                       className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                     />
-                    <span className="text-gray-700">{category}</span>
+                    <span className="text-gray-700 capitalize">{category}</span>
                   </label>
                 ))}
               </div>
@@ -325,17 +342,17 @@ const Shop = () => {
             >
               <span className="flex items-center gap-2">
                 <FiType className="w-4 h-4" />
-                Book Types
+                Book Types ({uniqueTypes.length})
               </span>
               {expandedSections.type ? <FiChevronUp /> : <FiChevronDown />}
             </button>
 
             {expandedSections.type && (
-              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+              <div className="mt-4 space-y-2">
                 {uniqueTypes.map((type) => (
                   <label
                     key={type}
-                    className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded"
+                    className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -343,7 +360,7 @@ const Shop = () => {
                       onChange={() => handleFilterChange("types", type)}
                       className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                     />
-                    <span className="text-gray-700">{type}</span>
+                    <span className="text-gray-700 capitalize">{type}</span>
                   </label>
                 ))}
               </div>
@@ -351,7 +368,7 @@ const Shop = () => {
           </div>
         )}
 
-        {/* Ratings */}
+        {/* ✅ FIXED: Ratings with better handling */}
         <div className="border-b border-gray-200 pb-6">
           <button
             className="flex justify-between items-center w-full text-left font-medium text-gray-900"
@@ -359,17 +376,17 @@ const Shop = () => {
           >
             <span className="flex items-center gap-2">
               <FiStar className="w-4 h-4" />
-              Ratings
+              Customer Ratings
             </span>
             {expandedSections.ratings ? <FiChevronUp /> : <FiChevronDown />}
           </button>
 
           {expandedSections.ratings && (
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
               {[4, 3, 2, 1].map((rating) => (
                 <label
                   key={rating}
-                  className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded"
+                  className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
                 >
                   <input
                     type="checkbox"
@@ -388,7 +405,7 @@ const Shop = () => {
                         }`}
                       />
                     ))}
-                    <span className="ml-1">& Up</span>
+                    <span className="ml-2 text-gray-600">{rating}.0 & Up</span>
                   </span>
                 </label>
               ))}
@@ -399,14 +416,32 @@ const Shop = () => {
     </div>
   );
 
+  // Show books from database even when no filters match initial load
+  const displayBooks = filteredBooks.length > 0 ? filteredBooks : books || [];
+
   return (
     <section className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <p className="text-red-700">Error loading books: {error}</p>
+              <button
+                onClick={() => dispatch(getBook())}
+                className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Filter Button */}
         <div className="lg:hidden mb-4">
           <button
             onClick={() => setMobileFiltersOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <FiFilter className="w-4 h-4" />
             Filters
@@ -420,12 +455,12 @@ const Shop = () => {
 
         <div className="flex gap-8">
           {/* Sidebar - Desktop */}
-          <div className="hidden lg:block w-80 flex-shrink-0 h-[calc(100vh-2rem)] overflow-y-auto sticky top-4">
+          <div className="hidden lg:block w-80 flex-shrink-0">
             <FilterSidebar />
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Search Results Info */}
             {showSearchInfo && (
               <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -466,12 +501,12 @@ const Shop = () => {
                       key={category}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
                     >
-                      Category: {category}
+                      {category}
                       <button
                         onClick={() =>
                           handleFilterChange("categories", category)
                         }
-                        className="hover:text-purple-900"
+                        className="hover:text-purple-900 ml-1"
                       >
                         <FiX className="w-3 h-3" />
                       </button>
@@ -481,12 +516,12 @@ const Shop = () => {
                   {filters.types.map((type) => (
                     <span
                       key={type}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
                     >
-                      Type: {type}
+                      {type}
                       <button
                         onClick={() => handleFilterChange("types", type)}
-                        className="hover:text-purple-900"
+                        className="hover:text-blue-900 ml-1"
                       >
                         <FiX className="w-3 h-3" />
                       </button>
@@ -498,10 +533,10 @@ const Shop = () => {
                       key={rating}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"
                     >
-                      Rating: {rating}+
+                      {rating}+ Stars
                       <button
                         onClick={() => handleFilterChange("ratings", rating)}
-                        className="hover:text-yellow-900"
+                        className="hover:text-yellow-900 ml-1"
                       >
                         <FiX className="w-3 h-3" />
                       </button>
@@ -510,8 +545,8 @@ const Shop = () => {
 
                   {(filters.minPrice !== priceRange.min.toString() ||
                     filters.maxPrice !== priceRange.max.toString()) && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                      Price: ${filters.minPrice} - ${filters.maxPrice}
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                      ${filters.minPrice} - ${filters.maxPrice}
                       <button
                         onClick={() => {
                           setFilters((prev) => ({
@@ -520,7 +555,7 @@ const Shop = () => {
                             maxPrice: priceRange.max.toString(),
                           }));
                         }}
-                        className="hover:text-gray-900"
+                        className="hover:text-green-900 ml-1"
                       >
                         <FiX className="w-3 h-3" />
                       </button>
@@ -531,19 +566,25 @@ const Shop = () => {
             )}
 
             {loading ? (
-              <Loader />
-            ) : filteredBooks.length === 0 ? (
+              <div className="flex justify-center items-center py-16">
+                <Loader />
+              </div>
+            ) : displayBooks.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
                 <div className="max-w-md mx-auto">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    {searchTerm ? "No books found" : "No books available"}
+                    {searchTerm || getActiveFiltersCount() > 0
+                      ? "No books found"
+                      : "No books available"}
                   </h3>
                   <p className="text-gray-500 mb-6">
                     {searchTerm
                       ? `We couldn't find any books matching "${searchTerm}". Try adjusting your search or filters.`
-                      : "There are currently no books available in this category."}
+                      : getActiveFiltersCount() > 0
+                      ? "No books match your current filters. Try adjusting your filter criteria."
+                      : "There are currently no books available in the store."}
                   </p>
-                  {searchTerm && (
+                  {(searchTerm || getActiveFiltersCount() > 0) && (
                     <button
                       onClick={clearAllFilters}
                       className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -555,19 +596,26 @@ const Shop = () => {
               </div>
             ) : (
               <>
-                {/* BookSection with filtered books */}
+                {/* BookSection with books */}
                 <div className="mb-8">
                   <BookSection
                     title={
-                      searchTerm ? `Search Results for "${searchTerm}"` : "All"
+                      searchTerm
+                        ? `Search Results for "${searchTerm}"`
+                        : getActiveFiltersCount() > 0
+                        ? "Filtered Books"
+                        : "All Books"
                     }
+                    subtitle={`Showing ${displayBooks.length} of ${
+                      books?.length || 0
+                    } books`}
                     productsPerRow={{
                       mobile: 1,
                       tablet: 2,
                       laptop: 3,
                       desktop: 3,
                     }}
-                    books={filteredBooks}
+                    books={displayBooks}
                     loading={loading}
                   />
                 </div>
@@ -581,16 +629,16 @@ const Shop = () => {
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
             onClick={() => setMobileFiltersOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-80 max-w-full bg-white overflow-y-auto">
+          <div className="fixed inset-y-0 left-0 w-80 max-w-full bg-white overflow-y-auto transform transition-transform">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Filters</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
