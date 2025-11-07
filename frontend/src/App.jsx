@@ -34,6 +34,7 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import GoogleSuccess from "./pages/Auth/GoogleSuccess";
 import Login from "./pages/Auth/Login";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import AuthorPage from "./pages/Author/Author";
 import BlogDetails from "./pages/Blogs/BlogDetails";
 import Blogs from "./pages/Blogs/Blogs";
 import BookPage from "./pages/Book/BookPage";
@@ -106,7 +107,7 @@ const App = () => {
         <Route path="/shipping" element={<ShippingPolicy />} />
         <Route path="/contact" element={<Contact />} />
         {/* <Route path="/about" element={<AboutUs />} /> */}
-        {/* <Route path="/author" element={<AuthorPage />} /> */}
+        <Route path="/author" element={<AuthorPage />} />
         <Route path="/terms" element={<TermsConditions />} />
         <Route path="/packages" element={<PackageSection />} />
         <Route path="/package/:slug" element={<PackageDetails />} />
